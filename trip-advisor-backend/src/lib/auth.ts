@@ -1,13 +1,17 @@
 import { betterAuth } from "better-auth";
+import { jwt } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { env } from "../env";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as appSchema from "../db/schema";
 import * as authSchema from "../db/auth-schema";
+import { v7 as uuidv7 } from "uuid";
 
 const pool = new Pool({ connectionString: env.DATABASE_URL });
-const db = drizzle(pool);
+const db = drizzle(pool, {
+  schema: { ...appSchema, ...authSchema },
+});
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -29,7 +33,12 @@ export const auth = betterAuth({
   experimental: {
     joins: true,
   },
-  plugins: [],
+  advanced: {
+    database: {
+      generateId: () => uuidv7(),
+    },
+  },
+  plugins: [jwt()],
 });
 
 export type AuthType = {

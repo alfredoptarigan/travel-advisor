@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { auth } from "../lib/auth";
 import { Handler } from "hono";
+import { env } from "../env";
 
 const RegisterSchema = z.object({
   email: z.string().email(),
@@ -11,6 +12,7 @@ const RegisterSchema = z.object({
 export const registerEmailPassword: Handler = async (c) => {
   const body = await c.req.json();
   const parsed = RegisterSchema.safeParse(body);
+
   if (!parsed.success) return c.json({ error: parsed.error.flatten() }, 400);
 
   try {
@@ -31,16 +33,29 @@ const LoginSchema = z.object({
 });
 
 export const loginEmailPassword: Handler = async (c) => {
-  const body = await c.req.json();
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return c.json({ error: "Invalid JSON", message }, 400);
+  }
   const parsed = LoginSchema.safeParse(body);
   if (!parsed.success) return c.json({ error: parsed.error.flatten() }, 400);
 
   try {
-    const res = await auth.api.signInEmail({
-      headers: c.req.raw.headers,
-      body: parsed.data,
+    const headers = new Headers(c.req.raw.headers);
+    headers.set("content-type", "application/json");
+    if (!headers.get("origin")) {
+      headers.set("origin", env.CORS_ORIGIN);
+    }
+    const req = new Request(`${env.BETTER_AUTH_URL}/api/auth/sign-in/email`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(parsed.data),
     });
-    return c.json({ data: res });
+    const response = await auth.handler(req);
+    return response;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     return c.json({ error: message }, 400);

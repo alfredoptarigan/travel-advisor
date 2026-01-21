@@ -59,6 +59,7 @@ app.onError((err, c) => {
   return c.json(
     {
       error: "Internal Server Error",
+      message: err instanceof Error ? err.message : String(err),
     },
     500,
   );
