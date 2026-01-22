@@ -3,7 +3,6 @@ import type { Context, Next } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
-import authRouter from "./routes/auth";
 import authHandlerRouter from "./routes/auth-handler";
 import userRouter from "./routes/user";
 import placeRouter from "./routes/place";
@@ -48,7 +47,6 @@ app.use("*", async (c: Context, next: Next) => {
   await next();
 });
 
-app.basePath("/api").route("/", authRouter);
 app.basePath("/api").route("/", authHandlerRouter);
 app.basePath("/api").route("/", userRouter);
 app.basePath("/api").route("/", placeRouter);

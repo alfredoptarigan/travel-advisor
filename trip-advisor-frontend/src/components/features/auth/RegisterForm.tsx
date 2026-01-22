@@ -1,14 +1,16 @@
 import { useForm } from "@tanstack/react-form";
-// import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
+import { formatErrors } from "@/lib/utils";
 
 const registerSchema = z
   .object({
     name: z.string().min(2),
     email: z.string().email(),
+    phoneNumber: z.string().min(6),
     password: z.string().min(8),
     confirmPassword: z.string().min(8),
   })
@@ -22,6 +24,7 @@ export function RegisterForm() {
     defaultValues: {
       name: "",
       email: "",
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
     },
@@ -30,9 +33,24 @@ export function RegisterForm() {
       onChange: registerSchema as any,
     },
     onSubmit: async ({ value }) => {
-      // Handle register
-      console.log(value);
-      alert("Register clicked (mock)");
+      try {
+        const { name, email, password, phoneNumber } = value;
+        const { error } = await authClient.signUp.email({
+          name,
+          email,
+          password,
+          phoneNumber,
+        } as any);
+        if (error) {
+          alert(`Registrasi gagal: ${error.message}`);
+          return;
+        }
+        alert("Registrasi berhasil");
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Terjadi kesalahan";
+        alert(`Registrasi gagal: ${message}`);
+      }
     },
   });
 
@@ -62,7 +80,7 @@ export function RegisterForm() {
             />
             {field.state.meta.errors ? (
               <em role="alert" className="text-destructive text-xs">
-                {field.state.meta.errors.join(", ")}
+                {formatErrors(field.state.meta.errors)}
               </em>
             ) : null}
           </div>
@@ -85,7 +103,30 @@ export function RegisterForm() {
             />
             {field.state.meta.errors ? (
               <em role="alert" className="text-destructive text-xs">
-                {field.state.meta.errors.join(", ")}
+                {formatErrors(field.state.meta.errors)}
+              </em>
+            ) : null}
+          </div>
+        )}
+      />
+      <form.Field
+        name="phoneNumber"
+        children={(field) => (
+          <div className="space-y-2">
+            <Label htmlFor={field.name}>Phone Number</Label>
+            <Input
+              id={field.name}
+              name={field.name}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                field.handleChange(e.target.value)
+              }
+              placeholder="08xxxxxxxxxx"
+            />
+            {field.state.meta.errors ? (
+              <em role="alert" className="text-destructive text-xs">
+                {formatErrors(field.state.meta.errors)}
               </em>
             ) : null}
           </div>
@@ -108,7 +149,7 @@ export function RegisterForm() {
             />
             {field.state.meta.errors ? (
               <em role="alert" className="text-destructive text-xs">
-                {field.state.meta.errors.join(", ")}
+                {formatErrors(field.state.meta.errors)}
               </em>
             ) : null}
           </div>
@@ -131,7 +172,7 @@ export function RegisterForm() {
             />
             {field.state.meta.errors ? (
               <em role="alert" className="text-destructive text-xs">
-                {field.state.meta.errors.join(", ")}
+                {formatErrors(field.state.meta.errors)}
               </em>
             ) : null}
           </div>

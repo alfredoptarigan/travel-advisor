@@ -248,7 +248,7 @@ const destinations: Record<string, Destination> = {
 };
 
 export function DestinationDetail() {
-  const { id } = useParams({ from: "/destinations/$id" });
+  const { id } = useParams({ from: "/_public/destinations/$id" });
   const { currency } = useCurrencyStore();
   const [showStickyNav, setShowStickyNav] = useState(false);
   const [isSaved, setIsSaved] = useState(false);

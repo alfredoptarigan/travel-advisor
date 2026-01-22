@@ -1,6 +1,5 @@
-import React from 'react'
-import { Link } from '@tanstack/react-router'
-import { LoginForm } from '@/components/features/auth/LoginForm'
+import { Link } from "@tanstack/react-router";
+import { LoginForm } from "@/components/features/auth/LoginForm";
 
 export function Login() {
   return (
@@ -16,5 +15,5 @@ export function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }

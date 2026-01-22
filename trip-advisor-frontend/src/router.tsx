@@ -5,50 +5,86 @@ import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { DestinationDetail } from './pages/DestinationDetail'
 import { Blog } from './pages/Blog'
+import DashboardLayout from './components/features/dashboard/DashboardLayout'
+import DashboardHome from './pages/dashboard/DashboardHome'
+import PlacesList from './pages/dashboard/PlacesList'
+import PublicLayout from './layouts/PublicLayout'
 
 // Create a root route
 const rootRoute = createRootRoute({
   component: App,
 })
 
-// Create index route
-const indexRoute = createRoute({
+// Create a public layout route (pathless)
+const publicRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: '_public',
+  component: PublicLayout,
+})
+
+// Public routes
+const indexRoute = createRoute({
+  getParentRoute: () => publicRoute,
   path: '/',
   component: Home,
 })
 
 const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicRoute,
   path: '/login',
   component: Login,
 })
 
 const registerRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicRoute,
   path: '/register',
   component: Register,
 })
 
 const destinationDetailRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicRoute,
   path: '/destinations/$id',
   component: DestinationDetail,
 })
 
 const blogRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => publicRoute,
   path: '/blog',
   component: Blog,
 })
 
-// Create the route tree using your routes
+// Dashboard Routes (Direct children of rootRoute, bypassing PublicLayout)
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dashboard',
+  component: DashboardLayout,
+})
+
+const dashboardIndexRoute = createRoute({
+  getParentRoute: () => dashboardRoute,
+  path: '/',
+  component: DashboardHome,
+})
+
+const dashboardPlacesRoute = createRoute({
+  getParentRoute: () => dashboardRoute,
+  path: 'places',
+  component: PlacesList,
+})
+
+// Create the route tree
 const routeTree = rootRoute.addChildren([
-  indexRoute,
-  loginRoute,
-  registerRoute,
-  destinationDetailRoute,
-  blogRoute,
+  publicRoute.addChildren([
+    indexRoute,
+    loginRoute,
+    registerRoute,
+    destinationDetailRoute,
+    blogRoute,
+  ]),
+  dashboardRoute.addChildren([
+    dashboardIndexRoute,
+    dashboardPlacesRoute,
+  ]),
 ])
 
 // Create the router

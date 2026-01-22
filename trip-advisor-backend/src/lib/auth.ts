@@ -39,6 +39,14 @@ export const auth = betterAuth({
     },
   },
   plugins: [jwt()],
+  user: {
+    additionalFields: {
+      phoneNumber: {
+        type: "string",
+        required: false,
+      },
+    },
+  },
 });
 
 export type AuthType = {
